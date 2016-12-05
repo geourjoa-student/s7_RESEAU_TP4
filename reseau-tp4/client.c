@@ -12,8 +12,9 @@
 #define SERVEUR_DEFAUT "localhost"
 
 #define TAILLE_MAX_COMMANDE 10
-#define TAILLE_TAMPON 200
+#define TAILLE_TAMPON 100
 
+void socket_to_file(int socket, int taille_fichier, char* nomFichier);
 void client_appli (char *serveur, char *service, char *protocole);
 
 
@@ -57,15 +58,11 @@ main(int argc, char *argv[])
 
 	return EXIT_SUCCESS;
 }
-void viderbuffer()
-{
-	int c;
-	while((c=getchar()) != EOF && c!='\n');
-}
+
 /*****************************************************************************/
 void client_appli (char *serveur,char *service,char *protocole)
 {
-	int code_commande;
+	char code_commande;
 	
 	char commande[TAILLE_MAX_COMMANDE];
 	char tampon[TAILLE_TAMPON];
@@ -107,9 +104,9 @@ void client_appli (char *serveur,char *service,char *protocole)
 
 		switch (code_commande) {
 			case LS:
-				printf("1\n");
 
-				printf("hw %d", h_writes(socket_local,code_commande,1));
+
+				printf("hw %d\n", h_writes(socket_local,&code_commande,1));
 
 				printf("hr %d\n",h_reads(socket_local, tampon, TAILLE_BUFFER_NOMBRE));
 
@@ -118,12 +115,10 @@ void client_appli (char *serveur,char *service,char *protocole)
 
 				int taille_fichier = atoi(tampon);
 
-				FILE *f;
 
 
+				socket_to_file(socket_local,taille_fichier,"ls.txt" );
 
-				socket_to_file(socket_local,taille_fichier,"ls.txt", f );
-				close(f);
 
 				break;
 
@@ -149,27 +144,38 @@ void client_appli (char *serveur,char *service,char *protocole)
 
  }
 
-void socket_to_file(int  socket, int taille_fichier, char* nomFichier, FILE *f){
+void socket_to_file(int socket, int taille_fichier, char* nomFichier){
 
-	f = fopen(nomFichier, "w");
+	printf("stof\n");
+
+	FILE *f = fopen(nomFichier, "w+");
 
 	char tampon[TAILLE_TAMPON];
 
 	int nb_octets_ecrits=0;
-	int nb_octest_lus;
+	int nb_octest_lus=0;
 
 	while(nb_octets_ecrits!=taille_fichier){
-		nb_octest_lus=h_reads(socket, tampon, TAILLE_TAMPON);
+		if(taille_fichier-nb_octest_lus>TAILLE_TAMPON)
+			nb_octest_lus=h_reads(socket, tampon, TAILLE_TAMPON);
+		else
+			nb_octest_lus=h_reads(socket, tampon, taille_fichier-nb_octest_lus);
 
 		printf("hr %d\n", nb_octest_lus);
+		//printf("tampon %s\n", tampon);
 
 		int i;
 		for (i = 0; i < nb_octest_lus; ++i) {
+			printf("%c", tampon[i]);
 			fputc(tampon[i], f);
 		}
 
 		nb_octets_ecrits+=nb_octest_lus;
 	}
+
+	fputc(EOF, f);
+
+	fclose(f);
 
 }
 	

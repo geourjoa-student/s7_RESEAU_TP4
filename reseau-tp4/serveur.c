@@ -90,14 +90,14 @@ void serveur_appli(char *service, char *protocole) {
 					int status;
 					pid_t pid_fils;
 
-					nb_lus = h_reads(socket_session, tampon,1); // lit le char tappé en entrée
+					printf("hr %d", h_reads(socket_session, tampon,1)); // lit le char tappé en entrée
 					//TODO rajouter des tests sur le nombre d'octets lu
 
 					switch (tampon[0]) {
 
 					case LS:
 
-						printf("1\n");
+
 
 						switch (pid_fils = fork()) {
 						//Fils qui execute sur le serveur
@@ -159,6 +159,8 @@ void serveur_appli(char *service, char *protocole) {
 
 					}
 
+					printf("Commande traitée \n");
+
 
 				}
 
@@ -191,6 +193,7 @@ void file_to_stream(char *nomFichier, char* stream, int* size) {
 
 	for (i = 0; i < *size; i++) {
 		stream[i] = fgetc(parcours);
+		//printf("%c", stream[i]);
 	}
 
 	fclose(parcours);
