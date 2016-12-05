@@ -3,7 +3,8 @@
 #include <curses.h> 		
 #include <sys/signal.h>
 #include <sys/wait.h>
-#include "fon.h"   		
+#include "fon.h"
+#include <string.h>
 
 #include "commande.h"
 
@@ -90,11 +91,17 @@ void client_appli(char *serveur, char *service, char *protocole) {
 				code_commande = GET;
 			} else {
 
-				if (strcmp(commande, "quit") == 0) {
-					code_commande = QUIT;
-				} else
-					//défault
-					code_commande = AIDE_CLIENT;
+				if (strcmp(commande, "put") == 0) {
+					code_commande = PUT;
+				} else {
+
+					if (strcmp(commande, "quit") == 0) {
+						code_commande = QUIT;
+					} else
+						//défault
+						code_commande = AIDE_CLIENT;
+				}
+
 			}
 		}
 		//TODO autre commande
@@ -142,6 +149,7 @@ void client_appli(char *serveur, char *service, char *protocole) {
 
 			printf("nom fichier à télecharger ?  ");
 			char fichierAObtenir[TAILLE_NOM_FICHIER_MAX];
+			char fichierResultat[TAILLE_NOM_FICHIER_MAX];
 			scanf("%s", &fichierAObtenir);
 
 			printf("hw %d\n", h_writes(socket_local, fichierAObtenir,
@@ -150,7 +158,26 @@ void client_appli(char *serveur, char *service, char *protocole) {
 			printf("hr %d\n",
 					h_reads(socket_local, tampon, TAILLE_BUFFER_NOMBRE));
 
-			socket_to_file(socket_local, atoi(tampon), "get.txt");
+			strcpy(fichierResultat, "get_");
+			strcpy(&fichierResultat[4], fichierAObtenir);
+
+			socket_to_file(socket_local, atoi(tampon), fichierResultat);
+
+			break;
+
+		case PUT:
+
+			printf("hw %d\n", h_writes(socket_local, &code_commande, 1));
+
+			printf("nom fichier à déposer ?  ");
+			char fichierAEnvoyer[TAILLE_NOM_FICHIER_MAX];
+
+			scanf("%s", &fichierAEnvoyer);
+
+			printf("hw %d\n", h_writes(socket_local, fichierAEnvoyer,
+			TAILLE_NOM_FICHIER_MAX));
+
+			//Envoyer
 
 			break;
 
@@ -189,7 +216,6 @@ void socket_to_file(int socket, int taille_fichier, char* nomFichier) {
 					taille_fichier - nb_octest_lus);
 
 		printf("hr %d\n", nb_octest_lus);
-		//printf("tampon %s\n", tampon);
 
 		int i;
 		for (i = 0; i < nb_octest_lus; ++i) {
@@ -200,6 +226,8 @@ void socket_to_file(int socket, int taille_fichier, char* nomFichier) {
 	}
 
 	fclose(f);
+
+	printf("Télechargement terminé.\n");
 
 }
 

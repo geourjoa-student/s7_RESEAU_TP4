@@ -150,7 +150,7 @@ void serveur_appli(char *service, char *protocole) {
 
 						char nomFichierAEnvoyer[TAILLE_NOM_FICHIER_MAX];
 
-						printf("hr %d",
+						printf("hr %d\n",
 								h_reads(socket_session, nomFichierAEnvoyer,
 										TAILLE_NOM_FICHIER_MAX));
 

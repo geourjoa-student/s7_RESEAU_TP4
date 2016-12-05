@@ -1,13 +1,13 @@
 client
 client.c
 client.o
+commande.c
 commande.h
 EssaiCurses.c
 essaison.c
 fon.c
 fon.h
 fon.o
-get.txt
 makecurse
 makefile
 README.md
