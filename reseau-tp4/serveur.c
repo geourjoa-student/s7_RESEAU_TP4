@@ -16,7 +16,9 @@
 #define TAILLE_TAMPON 50
 #define NB_REQUETE_MAX 1
 
-void file_to_stream(char *nomFichier, char* stream, int* size);
+
+int file_size(char *nomFichier);
+void file_to_stream(char *nomFichier, char* stream, int size);
 void serveur_appli(char *service, char* protocole);
 
 
@@ -90,7 +92,7 @@ void serveur_appli(char *service, char *protocole) {
 					int status;
 					pid_t pid_fils;
 
-					printf("hr %d", h_reads(socket_session, tampon,1)); // lit le char tappé en entrée
+					printf("hr %d\n", h_reads(socket_session, tampon,1)); // lit le char tappé en entrée
 					//TODO rajouter des tests sur le nombre d'octets lu
 
 					switch (tampon[0]) {
@@ -123,16 +125,17 @@ void serveur_appli(char *service, char *protocole) {
 
 
 								//Transferer le résultat de ls au client
-								char* stream,
-										taille_texte[TAILLE_BUFFER_NOMBRE];
-								int taille;
+
+								char taille_texte[TAILLE_BUFFER_NOMBRE];
+
+								int taille = file_size("temp.txt");
+								char *stream = (char*) malloc(taille * sizeof(char));
+
+								file_to_stream("temp.txt", stream, taille);
 
 
-								file_to_stream("temp.txt", stream, &taille);
+								sprintf(taille_texte, "%d", taille);
 
-								char code_rep = R_LS;
-
-								sprintf(taille_texte, "%d\n", taille);
 
 								printf("hw : %d\n",h_writes(socket_session, taille_texte,
 								TAILLE_BUFFER_NOMBRE));
@@ -179,23 +182,28 @@ void serveur_appli(char *service, char *protocole) {
 
 }
 
-void file_to_stream(char *nomFichier, char* stream, int* size) {
+
+
+int file_size(char *nomFichier){
+	FILE *parcours= fopen(nomFichier, "r");
+		fseek(parcours, 0, SEEK_END);
+		int size=ftell(parcours);
+		fclose(parcours);
+
+		return size;
+}
+
+void file_to_stream(char *nomFichier, char *stream, int size) {
 	int i;
 
 	FILE *parcours= fopen(nomFichier, "r");
-	fseek(parcours, 0, SEEK_END);
-	*size=ftell(parcours);
-	fclose(parcours);
 
-	parcours= fopen(nomFichier, "r");
-
-	stream = malloc(*size * sizeof(char));
-
-	for (i = 0; i < *size; i++) {
+	for (i = 0; i < size; i++) {
 		stream[i] = fgetc(parcours);
-		//printf("%c", stream[i]);
 	}
 
 	fclose(parcours);
+
+
 
 }
