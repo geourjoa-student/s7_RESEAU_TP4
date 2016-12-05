@@ -1,0 +1,17 @@
+client
+client.c
+client.o
+commande.h
+EssaiCurses.c
+essaison.c
+fon.c
+fon.h
+fon.o
+get.txt
+makecurse
+makefile
+README.md
+serveur
+serveur.c
+serveur.o
+temp.txt

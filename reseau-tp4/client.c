@@ -86,13 +86,17 @@ void client_appli(char *serveur, char *service, char *protocole) {
 			code_commande = LS;
 		} else {
 
-			if (strcmp(commande, "quit") == 0) {
-				code_commande = QUIT;
-			} else
-				//défault
-				code_commande = AIDE_CLIENT;
-		}
+			if (strcmp(commande, "get") == 0) {
+				code_commande = GET;
+			} else {
 
+				if (strcmp(commande, "quit") == 0) {
+					code_commande = QUIT;
+				} else
+					//défault
+					code_commande = AIDE_CLIENT;
+			}
+		}
 		//TODO autre commande
 
 		switch (code_commande) {
@@ -113,13 +117,13 @@ void client_appli(char *serveur, char *service, char *protocole) {
 			//Affichage du flux
 			while (nb_octets_imprime != taille_flux) {
 				if (taille_flux - nb_octest_lus > TAILLE_TAMPON)
-					nb_octest_lus = h_reads(socket_local, tampon, TAILLE_TAMPON);
+					nb_octest_lus = h_reads(socket_local, tampon,
+					TAILLE_TAMPON);
 				else
 					nb_octest_lus = h_reads(socket_local, tampon,
 							taille_flux - nb_octest_lus);
 
 				printf("hr %d\n", nb_octest_lus);
-
 
 				int i;
 				for (i = 0; i < nb_octest_lus; ++i) {
@@ -129,6 +133,24 @@ void client_appli(char *serveur, char *service, char *protocole) {
 
 				nb_octets_imprime += nb_octest_lus;
 			}
+
+			break;
+
+		case GET:
+
+			printf("hw %d\n", h_writes(socket_local, &code_commande, 1));
+
+			printf("nom fichier à télecharger ?  ");
+			char fichierAObtenir[TAILLE_NOM_FICHIER_MAX];
+			scanf("%s", &fichierAObtenir);
+
+			printf("hw %d\n", h_writes(socket_local, fichierAObtenir,
+			TAILLE_NOM_FICHIER_MAX));
+
+			printf("hr %d\n",
+					h_reads(socket_local, tampon, TAILLE_BUFFER_NOMBRE));
+
+			socket_to_file(socket_local, atoi(tampon), "get.txt");
 
 			break;
 
@@ -143,8 +165,6 @@ void client_appli(char *serveur, char *service, char *protocole) {
 		}
 
 	}
-
-
 
 	h_close(socket_local);
 
@@ -173,7 +193,6 @@ void socket_to_file(int socket, int taille_fichier, char* nomFichier) {
 
 		int i;
 		for (i = 0; i < nb_octest_lus; ++i) {
-			printf("%c", tampon[i]);
 			fputc(tampon[i], f);
 		}
 

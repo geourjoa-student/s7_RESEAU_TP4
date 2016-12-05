@@ -5,8 +5,8 @@
 
 
 
-#define LS 1
-#define PUT 2
+#define LS 2
+#define PUT 8
 #define GET 3
 
 #define R_LS 4
@@ -22,3 +22,4 @@
 
 
 #define TAILLE_BUFFER_NOMBRE 10
+#define TAILLE_NOM_FICHIER_MAX 100

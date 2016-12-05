@@ -16,11 +16,9 @@
 #define TAILLE_TAMPON 50
 #define NB_REQUETE_MAX 1
 
-
 int file_size(char *nomFichier);
 void file_to_stream(char *nomFichier, char* stream, int size);
 void serveur_appli(char *service, char* protocole);
-
 
 int main(int argc, char *argv[]) {
 
@@ -83,8 +81,6 @@ void serveur_appli(char *service, char *protocole) {
 			if (pid == 0) {
 				//Fils
 
-
-
 				h_close(socket);
 
 				while (session_en_cours) {
@@ -92,66 +88,91 @@ void serveur_appli(char *service, char *protocole) {
 					int status;
 					pid_t pid_fils;
 
-					printf("hr %d\n", h_reads(socket_session, tampon,1)); // lit le char tappé en entrée
+					printf("hr %d\n", h_reads(socket_session, tampon, 1)); // lit le char tappé en entrée
 					//TODO rajouter des tests sur le nombre d'octets lu
 
 					switch (tampon[0]) {
 
 					case LS:
 
-
-
 						switch (pid_fils = fork()) {
 						//Fils qui execute sur le serveur
 						case 0:
 
-
 							file = fopen("temp.txt", "w+");
 							dup2(fileno(file), STDOUT_FILENO);
 							fclose(file);
-							char* arg[] = {"ls", NULL};
-							execvp(arg[0],arg);
+							char* arg[] = { "ls", NULL };
+							execvp(arg[0], arg);
 							break;
 
 						default:
-
-
-
 
 							if (waitpid(pid_fils, &status, 0) == -1) {
 								perror("wait pid ls");
 								exit(-1);
 							} else {
 
-
 								//Transferer le résultat de ls au client
 
 								char taille_texte[TAILLE_BUFFER_NOMBRE];
 
 								int taille = file_size("temp.txt");
-								char *stream = (char*) malloc(taille * sizeof(char));
+								char *stream = (char*) malloc(
+										taille * sizeof(char));
 
 								file_to_stream("temp.txt", stream, taille);
 
 								sprintf(taille_texte, "%d", taille);
-								printf("hw : %d\n",h_writes(socket_session, taille_texte,
-								TAILLE_BUFFER_NOMBRE));
+								printf("hw : %d\n",
+										h_writes(socket_session, taille_texte,
+										TAILLE_BUFFER_NOMBRE));
 
-								printf("hw : %d\n", h_writes(socket_session, stream, taille));
+								printf("hw : %d\n",
+										h_writes(socket_session, stream,
+												taille));
 
 							}
 							break;
 						}
 
 						break;
+
+
 					case PUT:
+
 						break;
 
 					case GET:
+
+						//Erreur incompréhensible si j'enlevè ce printf de merde
+						printf("Commande get demandée\n");
+
+						char nomFichierAEnvoyer[TAILLE_NOM_FICHIER_MAX];
+
+						printf("hr %d",
+								h_reads(socket_session, nomFichierAEnvoyer,
+										TAILLE_NOM_FICHIER_MAX));
+
+						char taille_texte[TAILLE_BUFFER_NOMBRE];
+
+						int taille = file_size(nomFichierAEnvoyer);
+						char *stream = (char*) malloc(taille * sizeof(char));
+
+						file_to_stream(nomFichierAEnvoyer, stream, taille);
+
+						sprintf(taille_texte, "%d", taille);
+						printf("hw : %d\n",
+								h_writes(socket_session, taille_texte,
+								TAILLE_BUFFER_NOMBRE));
+
+						printf("hw : %d\n",
+								h_writes(socket_session, stream, taille));
+
 						break;
 
 					case QUIT:
-						session_en_cours=0;
+						session_en_cours = 0;
 						h_close(socket_session);
 						printf("Fin traitement session \n");
 						exit(EXIT_SUCCESS);
@@ -159,12 +180,12 @@ void serveur_appli(char *service, char *protocole) {
 						break;
 
 					default:
+						printf("dafault\n");
 						break;
 
 					}
 
 					printf("Commande traitée \n");
-
 
 				}
 				printf("Fin traitement session \n");
@@ -181,28 +202,24 @@ void serveur_appli(char *service, char *protocole) {
 
 }
 
+int file_size(char *nomFichier) {
+	FILE *parcours = fopen(nomFichier, "r");
+	fseek(parcours, 0, SEEK_END);
+	int size = ftell(parcours);
+	fclose(parcours);
 
-
-int file_size(char *nomFichier){
-	FILE *parcours= fopen(nomFichier, "r");
-		fseek(parcours, 0, SEEK_END);
-		int size=ftell(parcours);
-		fclose(parcours);
-
-		return size;
+	return size;
 }
 
 void file_to_stream(char *nomFichier, char *stream, int size) {
 	int i;
 
-	FILE *parcours= fopen(nomFichier, "r");
+	FILE *parcours = fopen(nomFichier, "r");
 
 	for (i = 0; i < size; i++) {
 		stream[i] = fgetc(parcours);
 	}
 
 	fclose(parcours);
-
-
 
 }
