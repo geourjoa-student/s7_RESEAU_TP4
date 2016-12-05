@@ -107,8 +107,6 @@ void client_appli(char *serveur, char *service, char *protocole) {
 
 			int taille_flux = atoi(tampon);
 
-			printf("taille flux %d\n", taille_flux);
-
 			int nb_octets_imprime = 0;
 			int nb_octest_lus = 0;
 
@@ -135,6 +133,7 @@ void client_appli(char *serveur, char *service, char *protocole) {
 			break;
 
 		case QUIT:
+			printf("hw %d\n", h_writes(socket_local, &code_commande, 1));
 			session_fini = 1;
 			break;
 
@@ -145,8 +144,7 @@ void client_appli(char *serveur, char *service, char *protocole) {
 
 	}
 
-	// fermeture connexion
-	h_writes(socket_local, QUIT, 1);
+
 
 	h_close(socket_local);
 

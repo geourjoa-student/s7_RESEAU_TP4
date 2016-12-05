@@ -118,7 +118,7 @@ void serveur_appli(char *service, char *protocole) {
 
 
 
-							if (waitpid(pid_fils, &status, NULL) == -1) {
+							if (waitpid(pid_fils, &status, 0) == -1) {
 								perror("wait pid ls");
 								exit(-1);
 							} else {
@@ -133,10 +133,7 @@ void serveur_appli(char *service, char *protocole) {
 
 								file_to_stream("temp.txt", stream, taille);
 
-
 								sprintf(taille_texte, "%d", taille);
-
-
 								printf("hw : %d\n",h_writes(socket_session, taille_texte,
 								TAILLE_BUFFER_NOMBRE));
 
@@ -154,7 +151,11 @@ void serveur_appli(char *service, char *protocole) {
 						break;
 
 					case QUIT:
+						session_en_cours=0;
 						h_close(socket_session);
+						printf("Fin traitement session \n");
+						exit(EXIT_SUCCESS);
+
 						break;
 
 					default:
@@ -166,9 +167,7 @@ void serveur_appli(char *service, char *protocole) {
 
 
 				}
-
-				h_close(socket_session);
-
+				printf("Fin traitement session \n");
 				exit(EXIT_SUCCESS);
 			} else {
 				//Pere
