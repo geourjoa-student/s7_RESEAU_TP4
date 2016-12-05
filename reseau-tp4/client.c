@@ -5,9 +5,14 @@
 #include <sys/wait.h>
 #include "fon.h"   		
 
+#include "commande.h"
+
 #define SERVICE_DEFAUT "1111"
 #define PROTOCOLE_DEFAUT "tcp"
 #define SERVEUR_DEFAUT "localhost"
+
+#define TAILLE_MAX_COMMANDE 10
+#define TAILLE_TAMPON 200
 
 void client_appli (char *serveur, char *service, char *protocole);
 
@@ -60,13 +65,16 @@ void viderbuffer()
 /*****************************************************************************/
 void client_appli (char *serveur,char *service,char *protocole)
 {
-	int i, nb_coups_joues=1;
+	int code_commande;
 	
-	char nb_erreurs, lettre, jeu_fini = 0,taille_mot; 
+	char commande[TAILLE_MAX_COMMANDE];
+	char tampon[TAILLE_TAMPON];
+
+	char session_fini = 0;
   	
 	struct sockaddr_in p_adr_distant;
 	
-	//Création socket
+	//Crï¿½ation socket
 	int socket_local = h_socket(AF_INET,SOCK_STREAM); 
 	
 	//Initialisation du socket
@@ -75,56 +83,95 @@ void client_appli (char *serveur,char *service,char *protocole)
 	//Connexion au serveur
 	h_connect(socket_local,&p_adr_distant);
 	
-	h_reads(socket_local,&taille_mot,sizeof(char)); // recupere la taille du mot	
 	
-	char mot_trouve[taille_mot]; // declaration du tableau du mot_courant
-	
-	printf("\n********************************\nBienvenue dans le jeu du pendu !\n********************************\n\n");
 
-	printf("Voici le mot actuel : \n");
-	for(i=0; i<taille_mot; i++){
-		printf(".");
-	}
-
-	printf("\n\n");
-
-	while(!jeu_fini)
+	while(!session_fini)
 	{
-		do {
-			printf("Coup %d : Saisissez une lettre minuscule: ", nb_coups_joues);
-			scanf("%c",&lettre);
-			viderbuffer();	
-		} while ( lettre > 'z' || lettre < 'a');
-		
-		
-		
-		h_writes(socket_local,&lettre,sizeof(char)); // Ecriture de la lettre jouée
-		h_reads(socket_local,mot_trouve,taille_mot); // Lecture de l'état du mot
-		
-		h_reads(socket_local,&nb_erreurs,sizeof(char)); // Lecture du nombre d'erreur		
-				
-		printf("Voici le mot actuel : \n");
-		for(i=0;i<taille_mot;i++)
-			printf("%c",mot_trouve[i]);
-		printf("\n\nVous avez encore droit a %d erreurs\n",nb_erreurs);
-		
-		h_reads(socket_local,&jeu_fini,sizeof(char)); // Lecture du bouléen d'état fin de partie
+		printf("Serveur $ ");
+		scanf("%s",&commande);
 
-		printf("\n\n");
+		//strcpy(commande,"ls");
 
-		nb_coups_joues++;
+		if(strcmp(commande, "ls")==0){
+			code_commande=LS;
+		} else {
+
+			if(strcmp(commande, "quit")==0){
+				code_commande=QUIT;
+			} else
+			//dÃ©fault
+			code_commande = AIDE_CLIENT;
+		}
+		
+		//TODO autre commande
+
+		switch (code_commande) {
+			case LS:
+				printf("1\n");
+
+				printf("hw %d", h_writes(socket_local,code_commande,1));
+
+				printf("hr %d\n",h_reads(socket_local, tampon, TAILLE_BUFFER_NOMBRE));
+
+
+				tampon[TAILLE_BUFFER_NOMBRE]='\0';
+
+				int taille_fichier = atoi(tampon);
+
+				FILE *f;
+
+
+
+				socket_to_file(socket_local,taille_fichier,"ls.txt", f );
+				close(f);
+
+				break;
+
+			case QUIT :
+				session_fini=1;
+				break;
+
+			default:
+				printf("Erreur sur la saisie de la commande \n" );
+				break;
+		}
+
+
 	}
 	
-	if(nb_erreurs > 0)		
-		printf("*** Vous avez gagne en %d coups ! ***\n", nb_coups_joues);
-	else		
-		printf("Vous avez perdu.\n");
+
 
 	// fermeture connexion
+	h_writes(socket_local, QUIT, 1);
+
 	h_close(socket_local);
 	
 
  }
+
+void socket_to_file(int  socket, int taille_fichier, char* nomFichier, FILE *f){
+
+	f = fopen(nomFichier, "w");
+
+	char tampon[TAILLE_TAMPON];
+
+	int nb_octets_ecrits=0;
+	int nb_octest_lus;
+
+	while(nb_octets_ecrits!=taille_fichier){
+		nb_octest_lus=h_reads(socket, tampon, TAILLE_TAMPON);
+
+		printf("hr %d\n", nb_octest_lus);
+
+		int i;
+		for (i = 0; i < nb_octest_lus; ++i) {
+			fputc(tampon[i], f);
+		}
+
+		nb_octets_ecrits+=nb_octest_lus;
+	}
+
+}
 	
 /*****************************************************************************/
 
