@@ -13,9 +13,7 @@
 #define SERVEUR_DEFAUT "localhost"
 
 #define TAILLE_MAX_COMMANDE 10
-#define TAILLE_TAMPON 100
 
-void socket_to_file(int socket, int taille_fichier, char* nomFichier);
 void client_appli(char *serveur, char *service, char *protocole);
 
 /*****************************************************************************/
@@ -126,7 +124,7 @@ void client_appli(char *serveur, char *service, char *protocole) {
 			//Affichage du flux
 			while (nb_octets_imprime != taille_flux) {
 
-			//	printf("imprime %d\n", nb_octets_imprime);
+				//	printf("imprime %d\n", nb_octets_imprime);
 
 				if (taille_flux - nb_octets_imprime > TAILLE_TAMPON)
 					nb_octest_lus = h_reads(socket_local, tampon,
@@ -183,6 +181,26 @@ void client_appli(char *serveur, char *service, char *protocole) {
 			printf("hw %d\n", h_writes(socket_local, fichierAEnvoyer,
 			TAILLE_NOM_FICHIER_MAX));
 
+			int taille = file_size(fichierAEnvoyer);
+			char taille_texte[TAILLE_BUFFER_NOMBRE];
+
+			char *stream = (char*) malloc(taille * sizeof(char));
+
+			file_to_stream(fichierAEnvoyer, stream, taille);
+
+			sprintf(taille_texte, "%d", taille);
+			printf("hw : %d\n", h_writes(socket_local, taille_texte,
+			TAILLE_BUFFER_NOMBRE));
+
+			printf("hw : %d\n",
+											h_writes(socket_local, stream, taille));
+
+
+			printf("upload terminé\n");
+
+
+
+
 			//Envoyer
 
 			break;
@@ -200,40 +218,6 @@ void client_appli(char *serveur, char *service, char *protocole) {
 	}
 
 	h_close(socket_local);
-
-}
-
-void socket_to_file(int socket, int taille_fichier, char* nomFichier) {
-
-	printf("stof\n");
-
-	FILE *f = fopen(nomFichier, "w+");
-
-	char tampon[TAILLE_TAMPON];
-
-	int nb_octets_ecrits = 0;
-	int nb_octest_lus = 0;
-
-	while (nb_octets_ecrits != taille_fichier) {
-		if (taille_fichier - nb_octets_ecrits > TAILLE_TAMPON)
-			nb_octest_lus = h_reads(socket, tampon, TAILLE_TAMPON);
-		else
-			nb_octest_lus = h_reads(socket, tampon,
-					taille_fichier - nb_octets_ecrits);
-
-		printf("hr %d\n", nb_octest_lus);
-
-		int i;
-		for (i = 0; i < nb_octest_lus; ++i) {
-			fputc(tampon[i], f);
-		}
-
-		nb_octets_ecrits += nb_octest_lus;
-	}
-
-	fclose(f);
-
-	printf("Télechargement terminé.\n");
 
 }
 

@@ -13,11 +13,8 @@
 #define SERVICE_DEFAUT "1111"
 #define PROTOCOLE_DEFAUT "tcp"
 
-#define TAILLE_TAMPON 50
 #define NB_REQUETE_MAX 1
 
-int file_size(char *nomFichier);
-void file_to_stream(char *nomFichier, char* stream, int size);
 void serveur_appli(char *service, char* protocole);
 
 int main(int argc, char *argv[]) {
@@ -138,8 +135,28 @@ void serveur_appli(char *service, char *protocole) {
 
 						break;
 
-
 					case PUT:
+
+						printf("Commande put demandée\n");
+
+						char nomFichierARecevoir[TAILLE_NOM_FICHIER_MAX];
+
+						//Lecture du nom du fichier
+						printf("hr %d\n",
+								h_reads(socket_session, nomFichierARecevoir,
+								TAILLE_NOM_FICHIER_MAX));
+
+						//Lecture de la taille du fichier
+						printf("hr %d\n",
+											h_reads(socket_session, tampon, TAILLE_BUFFER_NOMBRE));
+
+						char nouveauNomFichierARecevoir[TAILLE_NOM_FICHIER_MAX];
+
+						strcpy(nouveauNomFichierARecevoir, "put_");
+						strcpy(&nouveauNomFichierARecevoir[4], nomFichierARecevoir);
+
+
+						socket_to_file(socket_session, atoi(tampon), nouveauNomFichierARecevoir);
 
 						break;
 
@@ -152,7 +169,7 @@ void serveur_appli(char *service, char *protocole) {
 
 						printf("hr %d\n",
 								h_reads(socket_session, nomFichierAEnvoyer,
-										TAILLE_NOM_FICHIER_MAX));
+								TAILLE_NOM_FICHIER_MAX));
 
 						char taille_texte[TAILLE_BUFFER_NOMBRE];
 
@@ -202,24 +219,3 @@ void serveur_appli(char *service, char *protocole) {
 
 }
 
-int file_size(char *nomFichier) {
-	FILE *parcours = fopen(nomFichier, "r");
-	fseek(parcours, 0, SEEK_END);
-	int size = ftell(parcours);
-	fclose(parcours);
-
-	return size;
-}
-
-void file_to_stream(char *nomFichier, char *stream, int size) {
-	int i;
-
-	FILE *parcours = fopen(nomFichier, "r");
-
-	for (i = 0; i < size; i++) {
-		stream[i] = fgetc(parcours);
-	}
-
-	fclose(parcours);
-
-}

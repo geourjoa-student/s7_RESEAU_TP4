@@ -23,3 +23,12 @@
 
 #define TAILLE_BUFFER_NOMBRE 10
 #define TAILLE_NOM_FICHIER_MAX 100
+
+#define TAILLE_TAMPON 100
+
+
+
+int file_size(char *nomFichier) ;
+
+void file_to_stream(char *nomFichier, char *stream, int size);
+void socket_to_file(int socket, int taille_fichier, char* nomFichier);

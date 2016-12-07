@@ -1,6 +1,6 @@
 
-OBJ1 = fon.o client.o 
-OBJ2 = fon.o serveur.o 
+OBJ1 = fon.o commande.o client.o 
+OBJ2 = fon.o commande.o serveur.o 
 OPTIONS	=
 # Adaptation a Darwin / MacOS X avec fink
 # Du fait de l'absence de libtermcap on se fait pas mal
@@ -37,10 +37,13 @@ fon.o :  fon.h fon.c
 	gcc -c fon.c
 	#gcc -DDEBUG -c fon.c
 
-client.o : fon.h	client.c 
+commande.o :  commande.h commande.c
+	gcc -c commande.c
+
+client.o : fon.h  commande.h	client.c 
 	gcc  $(CFLAGS) -c  client.c	
 
-serveur.o : fon.h	serveur.c 
+serveur.o : fon.h  commande.h	serveur.c 
 	gcc  $(CFLAGS) -c  serveur.c	
 
 client : ${OBJ1}	
