@@ -215,11 +215,11 @@ void socket_to_file(int socket, int taille_fichier, char* nomFichier) {
 	int nb_octest_lus = 0;
 
 	while (nb_octets_ecrits != taille_fichier) {
-		if (taille_fichier - nb_octest_lus > TAILLE_TAMPON)
+		if (taille_fichier - nb_octets_ecrits > TAILLE_TAMPON)
 			nb_octest_lus = h_reads(socket, tampon, TAILLE_TAMPON);
 		else
 			nb_octest_lus = h_reads(socket, tampon,
-					taille_fichier - nb_octest_lus);
+					taille_fichier - nb_octets_ecrits);
 
 		printf("hr %d\n", nb_octest_lus);
 
