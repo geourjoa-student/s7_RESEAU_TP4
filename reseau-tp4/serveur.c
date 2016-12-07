@@ -92,6 +92,7 @@ void serveur_appli(char *service, char *protocole) {
 
 					case LS:
 
+						printf("Commande ls demandée\n");
 						switch (pid_fils = fork()) {
 						//Fils qui execute sur le serveur
 						case 0:
@@ -148,15 +149,17 @@ void serveur_appli(char *service, char *protocole) {
 
 						//Lecture de la taille du fichier
 						printf("hr %d\n",
-											h_reads(socket_session, tampon, TAILLE_BUFFER_NOMBRE));
+								h_reads(socket_session, tampon,
+										TAILLE_BUFFER_NOMBRE));
 
 						char nouveauNomFichierARecevoir[TAILLE_NOM_FICHIER_MAX];
 
 						strcpy(nouveauNomFichierARecevoir, "put_");
-						strcpy(&nouveauNomFichierARecevoir[4], nomFichierARecevoir);
+						strcpy(&nouveauNomFichierARecevoir[4],
+								nomFichierARecevoir);
 
-
-						socket_to_file(socket_session, atoi(tampon), nouveauNomFichierARecevoir);
+						socket_to_file(socket_session, atoi(tampon),
+								nouveauNomFichierARecevoir);
 
 						break;
 
@@ -197,7 +200,7 @@ void serveur_appli(char *service, char *protocole) {
 						break;
 
 					default:
-						printf("dafault\n");
+						printf("default\n");
 						break;
 
 					}
