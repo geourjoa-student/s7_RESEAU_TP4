@@ -121,14 +121,19 @@ void client_appli(char *serveur, char *service, char *protocole) {
 			int nb_octets_imprime = 0;
 			int nb_octest_lus = 0;
 
+			//printf("flux %d\n", taille_flux);
+
 			//Affichage du flux
 			while (nb_octets_imprime != taille_flux) {
-				if (taille_flux - nb_octest_lus > TAILLE_TAMPON)
+
+			//	printf("imprime %d\n", nb_octets_imprime);
+
+				if (taille_flux - nb_octets_imprime > TAILLE_TAMPON)
 					nb_octest_lus = h_reads(socket_local, tampon,
 					TAILLE_TAMPON);
 				else
 					nb_octest_lus = h_reads(socket_local, tampon,
-							taille_flux - nb_octest_lus);
+							taille_flux - nb_octets_imprime);
 
 				printf("hr %d\n", nb_octest_lus);
 
@@ -140,6 +145,7 @@ void client_appli(char *serveur, char *service, char *protocole) {
 
 				nb_octets_imprime += nb_octest_lus;
 			}
+			//printf("Ls terminé \n");
 
 			break;
 
