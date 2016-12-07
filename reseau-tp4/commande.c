@@ -28,8 +28,6 @@ void file_to_stream(char *nomFichier, char *stream, int size) {
 
 void socket_to_file(int socket, int taille_fichier, char* nomFichier) {
 
-	printf("stof\n");
-
 	FILE *f = fopen(nomFichier, "w+");
 
 	char tampon[TAILLE_TAMPON];
@@ -44,7 +42,6 @@ void socket_to_file(int socket, int taille_fichier, char* nomFichier) {
 			nb_octest_lus = h_reads(socket, tampon,
 					taille_fichier - nb_octets_ecrits);
 
-		printf("hr %d\n", nb_octest_lus);
 
 		int i;
 		for (i = 0; i < nb_octest_lus; ++i) {
@@ -56,6 +53,5 @@ void socket_to_file(int socket, int taille_fichier, char* nomFichier) {
 
 	fclose(f);
 
-	printf("Télechargement terminé.\n");
 
 }

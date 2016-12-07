@@ -85,16 +85,17 @@ void serveur_appli(char *service, char *protocole) {
 					int status;
 					pid_t pid_fils;
 
-					printf("hr %d\n", h_reads(socket_session, tampon, 1)); // lit le char tappé en entrée
-					//TODO rajouter des tests sur le nombre d'octets lu
+					//Lecture de la commande reçu.
+					h_reads(socket_session, tampon, 1);
 
 					switch (tampon[0]) {
 
 					case LS:
 
 						printf("Commande ls demandée\n");
+
 						switch (pid_fils = fork()) {
-						//Fils qui execute sur le serveur
+						//Fils qui execute la commande LS sur le serveur
 						case 0:
 
 							file = fopen("temp.txt", "w+");
@@ -122,13 +123,12 @@ void serveur_appli(char *service, char *protocole) {
 								file_to_stream("temp.txt", stream, taille);
 
 								sprintf(taille_texte, "%d", taille);
-								printf("hw : %d\n",
-										h_writes(socket_session, taille_texte,
-										TAILLE_BUFFER_NOMBRE));
+								h_writes(socket_session, taille_texte,
+										TAILLE_BUFFER_NOMBRE);
 
-								printf("hw : %d\n",
-										h_writes(socket_session, stream,
-												taille));
+								h_writes(socket_session, stream,taille);
+
+								remove("temp.txt");
 
 							}
 							break;
@@ -143,14 +143,10 @@ void serveur_appli(char *service, char *protocole) {
 						char nomFichierARecevoir[TAILLE_NOM_FICHIER_MAX];
 
 						//Lecture du nom du fichier
-						printf("hr %d\n",
-								h_reads(socket_session, nomFichierARecevoir,
-								TAILLE_NOM_FICHIER_MAX));
+						h_reads(socket_session, nomFichierARecevoir,TAILLE_NOM_FICHIER_MAX);
 
 						//Lecture de la taille du fichier
-						printf("hr %d\n",
-								h_reads(socket_session, tampon,
-										TAILLE_BUFFER_NOMBRE));
+						h_reads(socket_session, tampon,	TAILLE_BUFFER_NOMBRE);
 
 						char nouveauNomFichierARecevoir[TAILLE_NOM_FICHIER_MAX];
 
@@ -170,9 +166,7 @@ void serveur_appli(char *service, char *protocole) {
 
 						char nomFichierAEnvoyer[TAILLE_NOM_FICHIER_MAX];
 
-						printf("hr %d\n",
-								h_reads(socket_session, nomFichierAEnvoyer,
-								TAILLE_NOM_FICHIER_MAX));
+						h_reads(socket_session, nomFichierAEnvoyer,	TAILLE_NOM_FICHIER_MAX);
 
 						char taille_texte[TAILLE_BUFFER_NOMBRE];
 
@@ -182,12 +176,9 @@ void serveur_appli(char *service, char *protocole) {
 						file_to_stream(nomFichierAEnvoyer, stream, taille);
 
 						sprintf(taille_texte, "%d", taille);
-						printf("hw : %d\n",
-								h_writes(socket_session, taille_texte,
-								TAILLE_BUFFER_NOMBRE));
+						h_writes(socket_session, taille_texte,	TAILLE_BUFFER_NOMBRE);
 
-						printf("hw : %d\n",
-								h_writes(socket_session, stream, taille));
+						h_writes(socket_session, stream, taille);
 
 						break;
 

@@ -107,10 +107,9 @@ void client_appli(char *serveur, char *service, char *protocole) {
 		switch (code_commande) {
 		case LS:
 
-			printf("hw %d\n", h_writes(socket_local, &code_commande, 1));
+			h_writes(socket_local, &code_commande, 1);
 
-			printf("hr %d\n",
-					h_reads(socket_local, tampon, TAILLE_BUFFER_NOMBRE));
+			h_reads(socket_local, tampon, TAILLE_BUFFER_NOMBRE);
 
 			tampon[TAILLE_BUFFER_NOMBRE] = '\0';
 
@@ -133,8 +132,6 @@ void client_appli(char *serveur, char *service, char *protocole) {
 					nb_octest_lus = h_reads(socket_local, tampon,
 							taille_flux - nb_octets_imprime);
 
-				printf("hr %d\n", nb_octest_lus);
-
 				int i;
 				for (i = 0; i < nb_octest_lus; ++i) {
 					printf("%c", tampon[i]);
@@ -143,43 +140,42 @@ void client_appli(char *serveur, char *service, char *protocole) {
 
 				nb_octets_imprime += nb_octest_lus;
 			}
-			//printf("Ls terminé \n");
 
 			break;
 
 		case GET:
 
-			printf("hw %d\n", h_writes(socket_local, &code_commande, 1));
+			h_writes(socket_local, &code_commande, 1);
 
 			printf("nom fichier à télecharger ?  ");
 			char fichierAObtenir[TAILLE_NOM_FICHIER_MAX];
 			char fichierResultat[TAILLE_NOM_FICHIER_MAX];
 			scanf("%s", &fichierAObtenir);
 
-			printf("hw %d\n", h_writes(socket_local, fichierAObtenir,
-			TAILLE_NOM_FICHIER_MAX));
+			h_writes(socket_local, fichierAObtenir,TAILLE_NOM_FICHIER_MAX);
 
-			printf("hr %d\n",
-					h_reads(socket_local, tampon, TAILLE_BUFFER_NOMBRE));
+			h_reads(socket_local, tampon, TAILLE_BUFFER_NOMBRE);
 
 			strcpy(fichierResultat, "get_");
 			strcpy(&fichierResultat[4], fichierAObtenir);
 
 			socket_to_file(socket_local, atoi(tampon), fichierResultat);
 
+			printf("Télechargement terminé.\n");
+
+
 			break;
 
 		case PUT:
 
-			printf("hw %d\n", h_writes(socket_local, &code_commande, 1));
+			h_writes(socket_local, &code_commande, 1);
 
 			printf("nom fichier à déposer ?  ");
 			char fichierAEnvoyer[TAILLE_NOM_FICHIER_MAX];
 
 			scanf("%s", &fichierAEnvoyer);
 
-			printf("hw %d\n", h_writes(socket_local, fichierAEnvoyer,
-			TAILLE_NOM_FICHIER_MAX));
+			h_writes(socket_local, fichierAEnvoyer,	TAILLE_NOM_FICHIER_MAX);
 
 			int taille = file_size(fichierAEnvoyer);
 			char taille_texte[TAILLE_BUFFER_NOMBRE];
@@ -189,24 +185,18 @@ void client_appli(char *serveur, char *service, char *protocole) {
 			file_to_stream(fichierAEnvoyer, stream, taille);
 
 			sprintf(taille_texte, "%d", taille);
-			printf("hw : %d\n", h_writes(socket_local, taille_texte,
-			TAILLE_BUFFER_NOMBRE));
+			h_writes(socket_local, taille_texte,TAILLE_BUFFER_NOMBRE);
 
-			printf("hw : %d\n",
-											h_writes(socket_local, stream, taille));
-
+			h_writes(socket_local, stream, taille);
 
 			printf("upload terminé\n");
-
-
-
 
 			//Envoyer
 
 			break;
 
 		case QUIT:
-			printf("hw %d\n", h_writes(socket_local, &code_commande, 1));
+			h_writes(socket_local, &code_commande, 1);
 			session_fini = 1;
 			break;
 
