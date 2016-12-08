@@ -10,10 +10,9 @@
 #include "fon.h"     
 #include "commande.h"
 
-#define SERVICE_DEFAUT "1111"
-#define PROTOCOLE_DEFAUT "tcp"
 
 #define NB_REQUETE_MAX 1
+#define FICHIER_TEMPORAIRE ".temp"
 
 void serveur_appli(char *service, char* protocole);
 
@@ -76,29 +75,30 @@ void serveur_appli(char *service, char *protocole) {
 			exit(EXIT_FAILURE);
 		} else {
 			if (pid == 0) {
-				//Fils
 
 				h_close(socket);
 
-				while (session_en_cours) {
+				while (1) {
 
 					int status;
 					pid_t pid_fils;
 
-					//Lecture de la commande reçu.
+					//Lecture de la commande reçue.
 					h_reads(socket_session, tampon, 1);
 
+					//En cas d'ajout de commande, il faut les ajouter ici.
 					switch (tampon[0]) {
 
 					case LS:
 
-						printf("Commande ls demandée\n");
+						printf("[%d] Commande ls demandée.\n", getpid());
 
 						switch (pid_fils = fork()) {
 						//Fils qui execute la commande LS sur le serveur
 						case 0:
 
-							file = fopen("temp.txt", "w+");
+							//Utilisation d'un fichier temporaire pour récuperer le résultat de LS
+							file = fopen(FICHIER_TEMPORAIRE, "w+");
 							dup2(fileno(file), STDOUT_FILENO);
 							fclose(file);
 							char* arg[] = { "ls", NULL };
@@ -116,19 +116,20 @@ void serveur_appli(char *service, char *protocole) {
 
 								char taille_texte[TAILLE_BUFFER_NOMBRE];
 
-								int taille = file_size("temp.txt");
+								int taille = file_size(FICHIER_TEMPORAIRE);
 								char *stream = (char*) malloc(
 										taille * sizeof(char));
 
-								file_to_stream("temp.txt", stream, taille);
+								file_to_stream(FICHIER_TEMPORAIRE, stream, taille);
 
+								// int to char []
 								sprintf(taille_texte, "%d", taille);
 								h_writes(socket_session, taille_texte,
 										TAILLE_BUFFER_NOMBRE);
 
 								h_writes(socket_session, stream,taille);
 
-								remove("temp.txt");
+								remove(FICHIER_TEMPORAIRE);
 
 							}
 							break;
@@ -138,7 +139,7 @@ void serveur_appli(char *service, char *protocole) {
 
 					case PUT:
 
-						printf("Commande put demandée\n");
+						printf("[%d] Commande put demandée.\n", getpid());
 
 						char nomFichierARecevoir[TAILLE_NOM_FICHIER_MAX];
 
@@ -161,8 +162,7 @@ void serveur_appli(char *service, char *protocole) {
 
 					case GET:
 
-						//Erreur incompréhensible si j'enlevè ce printf de merde
-						printf("Commande get demandée\n");
+						printf("[%d] Commande get demandée.\n", getpid());
 
 						char nomFichierAEnvoyer[TAILLE_NOM_FICHIER_MAX];
 
@@ -171,6 +171,7 @@ void serveur_appli(char *service, char *protocole) {
 						char taille_texte[TAILLE_BUFFER_NOMBRE];
 
 						int taille = file_size(nomFichierAEnvoyer);
+
 						char *stream = (char*) malloc(taille * sizeof(char));
 
 						file_to_stream(nomFichierAEnvoyer, stream, taille);
@@ -185,25 +186,25 @@ void serveur_appli(char *service, char *protocole) {
 					case QUIT:
 						session_en_cours = 0;
 						h_close(socket_session);
-						printf("Fin traitement session \n");
+						printf("[%d] Fin traitement session client. \n", getpid());
 						exit(EXIT_SUCCESS);
 
 						break;
 
 					default:
-						printf("default\n");
+						printf("[%d] Commande inconnue reçue.\n", getpid());
 						break;
 
 					}
 
-					printf("Commande traitée \n");
 
+					printf("[%d] Commande traitée.\n", getpid());
 				}
-				printf("Fin traitement session \n");
-				exit(EXIT_SUCCESS);
+
+
 			} else {
 				//Pere
-				printf("Connexion d'un client.\n");
+				printf("[%d] Connexion d'un client.\n", pid);
 				h_close(socket_session);
 
 			}

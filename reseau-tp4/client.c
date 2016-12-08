@@ -8,10 +8,6 @@
 
 #include "commande.h"
 
-#define SERVICE_DEFAUT "1111"
-#define PROTOCOLE_DEFAUT "tcp"
-#define SERVEUR_DEFAUT "localhost"
-
 #define TAILLE_MAX_COMMANDE 10
 
 void client_appli(char *serveur, char *service, char *protocole);
@@ -79,8 +75,7 @@ void client_appli(char *serveur, char *service, char *protocole) {
 		printf("Serveur $ ");
 		scanf("%s", &commande);
 
-		//strcpy(commande,"ls");
-
+		//Ajouté ici de nouvelles commandes coté client
 		if (strcmp(commande, "ls") == 0) {
 			code_commande = LS;
 		} else {
@@ -152,7 +147,7 @@ void client_appli(char *serveur, char *service, char *protocole) {
 			char fichierResultat[TAILLE_NOM_FICHIER_MAX];
 			scanf("%s", &fichierAObtenir);
 
-			h_writes(socket_local, fichierAObtenir,TAILLE_NOM_FICHIER_MAX);
+			h_writes(socket_local, fichierAObtenir, TAILLE_NOM_FICHIER_MAX);
 
 			h_reads(socket_local, tampon, TAILLE_BUFFER_NOMBRE);
 
@@ -161,8 +156,12 @@ void client_appli(char *serveur, char *service, char *protocole) {
 
 			socket_to_file(socket_local, atoi(tampon), fichierResultat);
 
-			printf("Télechargement terminé.\n");
+			if (atoi(tampon) == 0) {
+				printf("Fichier introuvable.\n");
+			} else {
+				printf("Télechargement terminé.\n");
 
+			}
 
 			break;
 
@@ -175,7 +174,7 @@ void client_appli(char *serveur, char *service, char *protocole) {
 
 			scanf("%s", &fichierAEnvoyer);
 
-			h_writes(socket_local, fichierAEnvoyer,	TAILLE_NOM_FICHIER_MAX);
+			h_writes(socket_local, fichierAEnvoyer, TAILLE_NOM_FICHIER_MAX);
 
 			int taille = file_size(fichierAEnvoyer);
 			char taille_texte[TAILLE_BUFFER_NOMBRE];
@@ -185,13 +184,11 @@ void client_appli(char *serveur, char *service, char *protocole) {
 			file_to_stream(fichierAEnvoyer, stream, taille);
 
 			sprintf(taille_texte, "%d", taille);
-			h_writes(socket_local, taille_texte,TAILLE_BUFFER_NOMBRE);
+			h_writes(socket_local, taille_texte, TAILLE_BUFFER_NOMBRE);
 
 			h_writes(socket_local, stream, taille);
 
 			printf("upload terminé\n");
-
-			//Envoyer
 
 			break;
 
@@ -200,10 +197,26 @@ void client_appli(char *serveur, char *service, char *protocole) {
 			session_fini = 1;
 			break;
 
+		case AIDE_CLIENT:
+
+			printf("Commandes disponibles :\n");
+			printf("ls : affichage du contenu du dossier.\n");
+			printf(
+					"get : telecharger un fichier du serveur, le préfixe 'get_' sera ajouté au nom du fichier.\n");
+			printf(
+					"put : envoyer un fichier du serveur, le préfixe 'put_' sera ajouté au nom du fichier.\n");
+
+			break;
 		default:
 			printf("Erreur sur la saisie de la commande \n");
 			break;
 		}
+
+		//Vider le buffer de stdin
+		int c;
+		do {
+		  c = getchar();
+		} while (c != EOF && c != '\n');
 
 	}
 

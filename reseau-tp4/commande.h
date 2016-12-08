@@ -26,6 +26,10 @@
 
 #define TAILLE_TAMPON 100
 
+#define SERVICE_DEFAUT "1111"
+#define PROTOCOLE_DEFAUT "tcp"
+#define SERVEUR_DEFAUT "localhost"
+
 
 
 int file_size(char *nomFichier) ;
