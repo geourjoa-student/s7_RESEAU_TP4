@@ -21,17 +21,17 @@ Le serveur produit un retour console des interactions avec les clients. Le pid d
 
 #Exemple de tests :
 
-*shell 1 : ls
-*shell 2 : ls
-*shell 1 : get client
-*shell 1 : put get_client
-*shell 2 : get put_get_client
-*shell 2 : put get_putget_client
-*shell 1 : ls
-*shell 2 : ls
-*shell 1 : quit
-*shell 2 : polytech
-*shell 2 : quit
+* shell 1 : ls
+* shell 2 : ls
+* shell 1 : get client
+* shell 1 : put get_client
+* shell 2 : get put_get_client
+* shell 2 : put get_putget_client
+* shell 1 : ls
+* shell 2 : ls
+* shell 1 : quit
+* shell 2 : polytech
+* shell 2 : quit
 
 #Problème rencontrés :
 
