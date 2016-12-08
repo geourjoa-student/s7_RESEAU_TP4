@@ -1,3 +1,5 @@
 *.o
 client
 serveur
+get_*
+put_*
