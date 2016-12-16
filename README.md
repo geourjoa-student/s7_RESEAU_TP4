@@ -7,6 +7,10 @@ Les échanges se font grâce au protocole TCP et le serveur peut traiter plusieu
 #Limitations du programmes :
 Dans le cas d'un put ou get ou le fichier est inexistant, le programme peut buguer. Nous n'avons pas eu le temps d'améliorer cet aspect du TP.
 
+#Installation 
+
+$~ make
+
 #Protocole de test:
 
 -Ouvrir un shell et lancer serveur.
